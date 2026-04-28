@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ plan.title }} - 行程詳情{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/plan" class="text-decoration-none">我的行程</a></li>
+        <li class="breadcrumb-item active">{{ plan.title }}</li>
+      </ol>
+    </nav>
+    <a href="/search" class="btn btn-outline-primary rounded-pill">
+        <i class="bi bi-plus-lg me-1"></i>新增景點/餐廳
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="bg-white rounded-5 shadow-sm p-5 mb-5">
+            <div class="d-flex align-items-center mb-5">
+                <div class="display-5 fw-bold me-3 text-primary"><i class="bi bi-geo-fill"></i></div>
+                <div>
+                    <h1 class="fw-bold mb-0">{{ plan.title }}</h1>
+                    <p class="text-secondary mb-0">您的專屬旅遊時間軸</p>
+                </div>
+            </div>
+
+            {% if items %}
+                <div class="timeline">
+                    {% for item in items %}
+                        <div class="timeline-item d-flex gap-4 mb-5 position-relative">
+                            <div class="timeline-marker bg-primary rounded-circle shadow-sm" style="width: 20px; height: 20px; margin-top: 8px; z-index: 2;"></div>
+                            <div class="card border-0 shadow-sm rounded-4 flex-grow-1 overflow-hidden">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="badge {% if item.item_type == 'attraction' %}bg-info-subtle text-info{% else %}bg-warning-subtle text-warning{% endif %} rounded-pill mb-2 px-3">
+                                                {{ '景點' if item.item_type == 'attraction' else '餐廳' }}
+                                            </div>
+                                            <h4 class="fw-bold mb-1">{{ item.name }}</h4>
+                                            <div class="text-secondary small">
+                                                <i class="bi bi-clock me-1"></i>預計時間：{{ item.event_time }}
+                                            </div>
+                                        </div>
+                                        <form action="/plan/{{ plan.id }}/items/{{ item.id }}/delete" method="POST">
+                                            <button type="submit" class="btn btn-link text-danger p-0" title="移除">
+                                                <i class="bi bi-x-circle fs-5"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if not loop.last %}
+                                <div class="timeline-line position-absolute bg-light" style="width: 2px; top: 20px; bottom: -50px; left: 9px; z-index: 1;"></div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3211/3211537.png" alt="Empty" style="width: 100px; opacity: 0.3;" class="mb-4">
+                    <h5 class="text-secondary">目前清單內沒有項目</h5>
+                    <p class="text-muted mb-4">開始搜尋景點並將它們加入行程吧！</p>
+                    <a href="/search" class="btn btn-primary rounded-pill px-4">前往探索</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-5 p-4 mb-4 sticky-top" style="top: 100px;">
+            <h5 class="fw-bold mb-4">行程摘要</h5>
+            <ul class="list-unstyled mb-4">
+                <li class="d-flex justify-content-between mb-3">
+                    <span class="text-secondary">總項目</span>
+                    <span class="fw-bold">{{ items|length }} 個</span>
+                </li>
+                <li class="d-flex justify-content-between mb-3">
+                    <span class="text-secondary">預計天數</span>
+                    <span class="fw-bold">1 天</span>
+                </li>
+            </ul>
+            <hr class="mb-4">
+            <div class="d-grid">
+                <button class="btn btn-dark btn-lg rounded-pill fw-bold" onclick="window.print()">
+                    <i class="bi bi-printer me-2"></i>列印行程表
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline-item:last-child {
+        margin-bottom: 0 !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}{{ attraction.name }} - TravelAI{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">首頁</a></li>
+    <li class="breadcrumb-item"><a href="/search" class="text-decoration-none">探索景點</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ attraction.name }}</li>
+  </ol>
+</nav>
+
+<div class="row g-5">
+    <div class="col-lg-7">
+        <div class="position-relative mb-4">
+            <img src="{{ attraction.image_url or 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80' }}" class="img-fluid rounded-5 shadow-lg w-100" alt="{{ attraction.name }}" style="max-height: 500px; object-fit: cover;">
+            <div class="position-absolute top-0 end-0 m-4">
+                <span class="badge bg-white text-dark shadow-sm p-3 rounded-4 fs-5">
+                    <i class="bi bi-star-fill text-warning me-2"></i>4.9
+                </span>
+            </div>
+        </div>
+        
+        <div class="mb-5">
+            <h1 class="display-4 fw-bold mb-3">{{ attraction.name }}</h1>
+            <div class="d-flex align-items-center text-secondary mb-4 fs-5">
+                <i class="bi bi-geo-alt-fill text-primary me-2"></i>{{ attraction.location }}
+            </div>
+            <div class="bg-white p-4 rounded-4 shadow-sm border-start border-primary border-4 mb-4">
+                <p class="lead mb-0 text-dark" style="line-height: 1.8;">
+                    {{ attraction.description or '此景點尚未提供詳細介紹。' }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-3 d-md-flex">
+            <a href="/places/{{ attraction.id }}/restaurants" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                <i class="bi bi-egg-fried me-2"></i>查看周邊美食
+            </a>
+            <button type="button" class="btn btn-outline-dark btn-lg rounded-pill px-5" data-bs-toggle="modal" data-bs-target="#addToPlanModal">
+                <i class="bi bi-plus-circle me-2"></i>加入我的行程
+            </button>
+        </div>
+    </div>
+    
+    <div class="col-lg-5">
+        <!-- 天氣資訊卡片 -->
+        <div class="card bg-primary text-white border-0 shadow-lg rounded-5 mb-4 overflow-hidden">
+            <div class="card-body p-5">
+                <h4 class="fw-bold mb-4">即時天氣狀態</h4>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="display-2 fw-bold mb-0">{{ weather_info.temp }}°C</div>
+                        <div class="fs-4">{{ weather_info.condition }}</div>
+                        <div class="small opacity-75">{{ weather_info.description }}</div>
+                    </div>
+                    <div class="display-1">
+                        {% if weather_info.icon == '01d' %}
+                            <i class="bi bi-sun"></i>
+                        {% else %}
+                            <i class="bi bi-cloud-sun"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white bg-opacity-10 py-3 text-center">
+                最後更新：剛才
+            </div>
+        </div>
+
+        <!-- 建議旅遊時間 -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2 text-primary"></i>最佳參觀時間</h5>
+            <p class="text-secondary mb-0">建議於早上 10:00 前抵達以避開人潮。預計停留時間：2-3 小時。</p>
+        </div>
+
+        <!-- 地圖預留位 -->
+        <div class="rounded-5 overflow-hidden shadow-sm border" style="height: 250px; background-color: #e2e8f0; position: relative;">
+            <div class="position-absolute top-50 start-50 translate-middle text-center text-muted">
+                <i class="bi bi-map display-4 mb-2"></i>
+                <div>地圖載入中...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add to Plan Modal -->
+<div class="modal fade" id="addToPlanModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-5 shadow-lg">
+      <div class="modal-header border-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold">加入行程規劃</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        {% if plans %}
+          <p class="text-secondary mb-4">選擇您想要加入的行程專案：</p>
+          <div class="list-group list-group-flush rounded-4 overflow-hidden border mb-4">
+              {% for plan in plans %}
+                <button type="button" class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center border-bottom" onclick="selectPlan('{{ plan.id }}', '{{ plan.title }}')">
+                  <span><i class="bi bi-calendar-check me-2 text-primary"></i>{{ plan.title }}</span>
+                  <i class="bi bi-chevron-right text-muted"></i>
+                </button>
+              {% endfor %}
+          </div>
+          
+          <form id="addForm" method="POST" class="animate-fade-in d-none">
+              <input type="hidden" name="item_type" value="attraction">
+              <input type="hidden" name="item_id" value="{{ attraction.id }}">
+              <div class="bg-light p-3 rounded-4 mb-4">
+                  <label class="form-label fw-bold small text-uppercase text-secondary">預計前往時間</label>
+                  <input type="datetime-local" name="event_time" class="form-control border-0 bg-transparent p-0 fs-5" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow">
+                  確認加入 <span id="selectedPlanTitle"></span>
+              </button>
+          </form>
+        {% else %}
+          <div class="text-center py-4">
+              <i class="bi bi-journal-x display-4 text-muted mb-3 d-block"></i>
+              <p class="text-secondary">您目前還沒有建立任何行程專案。</p>
+              <a href="/plan/new" class="btn btn-primary rounded-pill px-5 py-3 mt-2 fw-bold">
+                  <i class="bi bi-plus-lg me-2"></i>立即建立新行程
+              </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectPlan(id, title) {
+    const form = document.getElementById('addForm');
+    form.action = `/plan/${id}/items/add`;
+    form.classList.remove('d-none');
+    document.getElementById('selectedPlanTitle').innerText = `"${title}"`;
+    
+    // 自動設定為現在時間
+    const timeInput = form.querySelector('input[type="datetime-local"]');
+    if (!timeInput.value) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        timeInput.value = now.toISOString().slice(0, 16);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}建立新行程 - TravelAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-lg rounded-5 overflow-hidden">
+            <div class="card-header bg-primary py-4 text-center border-0">
+                <h3 class="fw-bold text-white mb-0"><i class="bi bi-magic me-2"></i>開啟新冒險</h3>
+            </div>
+            <div class="card-body p-5">
+                <form action="/plan/create" method="POST">
+                    <div class="mb-4">
+                        <label for="title" class="form-label fw-semibold fs-5 mb-3">您的行程名稱</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 bg-light border-0 py-3" id="title" name="title" placeholder="例如：台北三天兩夜美食之旅" required>
+                        <div class="form-text mt-2 text-secondary">
+                            <i class="bi bi-lightbulb me-1"></i>給您的行程起一個響亮的名字吧！
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow">
+                            開始規劃行程 <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/plan" class="text-decoration-none text-secondary">
+                <i class="bi bi-chevron-left me-1"></i>返回行程列表
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

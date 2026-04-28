@@ -1,20 +1,22 @@
-from flask import render_template, request, redirect, url_for
-from app.routes import main_bp
+from flask import Blueprint, render_template, request
+from app.models import attraction
 
-@main_bp.route('/')
+bp = Blueprint('main', __name__)
+
+@bp.route('/')
 def index():
-    """
-    HTTP Method: GET
-    首頁：顯示搜尋框與首頁歡迎畫面。
-    輸出：渲染 templates/index.html
-    """
-    pass
+    """首頁"""
+    return render_template('index.html')
 
-@main_bp.route('/search')
+@bp.route('/search')
 def search():
-    """
-    HTTP Method: GET
-    搜尋景點：讀取 query parameter `q`，並回傳搜尋結果。
-    輸出：渲染 templates/search.html
-    """
-    pass
+    """搜尋景點"""
+    query = request.args.get('q', '')
+    # 這裡目前簡化為取得所有景點，實際實作可增加關鍵字篩選
+    attractions = attraction.get_all()
+    
+    # 簡單的關鍵字篩選 (純 Python 實現，未來可優化至 SQL)
+    if query:
+        attractions = [a for a in attractions if query.lower() in a['name'].lower() or query.lower() in a['location'].lower()]
+        
+    return render_template('search.html', attractions=attractions, query=query)
